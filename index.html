@@ -738,7 +738,7 @@
     animation: heroRise 0.6s ease both;
   }
 
-  .slogan { position: relative; padding: 1.3rem 0 0.9rem; isolation: isolate; }
+  .slogan { position: relative; padding: 1.3rem 0 0.9rem; isolation: isolate; overflow-x: clip; }
   /* Logo de la marca, visible y centrado arriba del título */
   .brand-logo {
     display: block;
@@ -1064,6 +1064,12 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+  }
+  /* Mata el scroll horizontal: los halos decorativos del slogan se salen del
+     ancho de pantalla y hacían que el form se "moviera" para los costados. */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
   }
   a, button, input, select, .search-option, .cal-day, .hora-box,
   .cal-year-item, .cal-month-item, [onclick] {
@@ -3185,17 +3191,34 @@ document.addEventListener('click', e => {
   setTimeout(() => requestAnimationFrame(contar), 600);
 })();
 
-// Cerrar teclado al hacer scroll en móvil
+// Cerrar teclado al hacer scroll manual en móvil
 (function() {
+  let ultimoFoco = 0;      // momento en que se enfocó un campo
+  let yAlEnfocar = 0;      // posición de scroll al enfocar
   let scrollTimer;
+
+  // Cuando se enfoca un campo, guardamos el momento y la posición.
+  // El navegador hace un auto-scroll para subir el campo arriba del teclado:
+  // ese scroll NO debe cerrar el teclado.
+  document.addEventListener('focusin', function(e) {
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) {
+      ultimoFoco = Date.now();
+      yAlEnfocar = window.scrollY;
+    }
+  }, true);
+
   window.addEventListener('scroll', function() {
     clearTimeout(scrollTimer);
     scrollTimer = setTimeout(function() {
       const el = document.activeElement;
-      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') && el.type !== 'hidden') {
-        el.blur();
-      }
-    }, 50);
+      if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA') || el.type === 'hidden') return;
+      // Ignorar el auto-scroll que ocurre apenas se enfoca el campo (primeros 700 ms)
+      if (Date.now() - ultimoFoco < 700) return;
+      // Solo cerrar si el usuario realmente desplazó la página (más de 40 px)
+      if (Math.abs(window.scrollY - yAlEnfocar) < 40) return;
+      el.blur();
+    }, 120);
   }, { passive: true });
 })();
 
