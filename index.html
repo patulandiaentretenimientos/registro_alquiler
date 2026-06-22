@@ -57,6 +57,7 @@
     --border: #E8DECF;        /* borde suave crema */
     --input-bg: #FFFDF9;      /* fondo de inputs */
     --shadow: 0 8px 40px rgba(47,85,192,0.12);
+    --card-pad: 2.8rem;       /* padding horizontal del card — usado también en márgenes negativos */
   }
 
   @keyframes fadeUp {
@@ -153,11 +154,12 @@
   .card {
     background: var(--card);
     border-radius: 28px;
-    padding: 2.8rem;
+    padding: var(--card-pad);
     padding-top: 0;
     box-shadow: 0 2px 0 var(--border), 0 16px 60px rgba(47,85,192,0.14), 0 2px 8px rgba(31,62,150,0.06);
     border: 1.5px solid var(--border);
     overflow: visible;
+    overflow-x: clip; /* nunca desborda horizontalmente, sin cortar dropdowns verticales */
   }
 
   .field {
@@ -172,12 +174,16 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
     margin-bottom: 0.45rem;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 
   input[type="text"], input[type="tel"], input[type="date"], input[type="time"], select {
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
     padding: 0.88rem 1rem;
     border: 1.5px solid var(--border);
     border-radius: 12px;
@@ -347,6 +353,8 @@
     color: var(--muted);
     font-weight: 600;
     margin-top: 0.35rem;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 
   .divider {
@@ -359,8 +367,8 @@
     display: flex;
     align-items: center;
     gap: 0.7rem;
-    margin: 2.6rem -2.8rem 1.7rem;
-    padding: 0.72rem 2.8rem;
+    margin: 2.6rem calc(-1 * var(--card-pad)) 1.7rem;
+    padding: 0.72rem var(--card-pad);
     font-size: 0.72rem;
     font-weight: 800;
     color: var(--accent-dark);
@@ -369,6 +377,8 @@
     background: linear-gradient(90deg, rgba(47,85,192,0.09) 0%, rgba(47,85,192,0.03) 100%);
     border-top: 1.5px solid var(--border);
     border-bottom: 1.5px solid var(--border);
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   .section-title::after {
     content: '';
@@ -394,11 +404,13 @@
     border-left: 3px solid #F4A925;
     border-radius: 0 0 10px 0;
     padding: 0.75rem 1rem;
-    margin: -1.7rem -2.8rem 1.4rem;
+    margin: -1.7rem calc(-1 * var(--card-pad)) 1.4rem;
     font-size: 0.88rem;
     font-weight: 600;
     color: #7A4F00;
     line-height: 1.45;
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
   .contact-hint-icon {
     font-size: 1.1rem;
@@ -1018,7 +1030,7 @@
   @media (max-width: 600px) {
     body { padding: 1rem 0.7rem; align-items: flex-start; }
     .container { max-width: 100%; }
-    .card { padding: 1.4rem; padding-top: 0; border-radius: 22px; }
+    .card { --card-pad: 1.4rem; padding: var(--card-pad); padding-top: 0; border-radius: 22px; }
     .header { margin-bottom: 1.6rem; }
 
     /* 16px corta el zoom automático de iOS al enfocar un campo */
@@ -1162,7 +1174,7 @@
 
     <!-- Formulario -->
     <div id="form-section">
-      <div class="section-title" style="margin-top:0; border-radius: 26px 26px 0 0; border-top:none; padding-left: 2.8rem;">🗓️ DATOS DEL EVENTO</div>
+      <div class="section-title" style="margin-top:0; border-radius: 26px 26px 0 0; border-top:none; padding-left: var(--card-pad);">🗓️ DATOS DEL EVENTO</div>
 
       <!-- Fecha del evento: calendario 3 pasos igual al de nacimiento -->
       <div class="field" id="field-fecha-evento">
@@ -1215,7 +1227,7 @@
       <style>
         .wb-firsttime { display:flex; flex-direction:row; gap:0.5rem; margin-top:0.35rem; }
         .wb-opt {
-          flex:1; display:flex; align-items:center; gap:0.6rem;
+          flex:1; min-width:0; display:flex; align-items:center; gap:0.6rem;
           padding:0.62rem 0.85rem;
           border:1.5px solid var(--border);
           border-radius:12px;
@@ -1230,6 +1242,7 @@
         .wb-opt .wb-txt {
           font-size:0.88rem; font-weight:700; color:var(--text);
           line-height:1.25; text-transform:none; letter-spacing:0;
+          overflow-wrap:break-word; word-break:break-word; min-width:0;
         }
         .wb-opt .wb-check {
           margin-left:auto; width:17px; height:17px; flex-shrink:0;
@@ -1268,13 +1281,13 @@
       <div class="two-col">
         <div class="field" id="field-calle">
           <label for="calle">Calle</label>
-          <input type="text" id="calle" placeholder="Ej: Av. San Martín" oninput="updateSteps()" />
+          <input type="text" id="calle" placeholder="Ej: Av. San Martín" enterkeyhint="next" oninput="updateSteps()" />
           <p class="error-msg" id="err-calle">Obligatorio</p>
         </div>
         <div class="field" id="field-numero">
           <label for="numero">Número</label>
           <div class="numero-wrap">
-            <input type="text" id="numero" placeholder="Ej: 743" maxlength="7" inputmode="numeric" oninput="validarNumeroDireccion(); updateSteps()" />
+            <input type="text" id="numero" placeholder="Ej: 743" maxlength="7" inputmode="numeric" enterkeyhint="done" oninput="validarNumeroDireccion(); updateSteps()" />
             <button type="button" id="btn-sin-numero" class="btn-sn" onclick="toggleSinNumero()">S/N</button>
           </div>
           <p class="error-msg" id="err-numero">Obligatorio</p>
@@ -1285,7 +1298,7 @@
       <div class="field" id="field-municipio">
         <label id="label-municipio">Municipio (Zona Oeste)</label>
         <div class="search-wrap" id="wrap-municipio">
-          <input type="text" id="search-municipio" placeholder="Buscar municipio..." autocomplete="off"
+          <input type="text" id="search-municipio" placeholder="Buscar municipio..." autocomplete="off" enterkeyhint="search"
             oninput="filtrarOpciones('municipio')" onfocus="abrirDropdown('municipio')" onkeydown="keyNav(event,'municipio')" />
           <span class="search-arrow">▾</span>
           <div class="search-dropdown" id="drop-municipio"></div>
@@ -1298,7 +1311,7 @@
       <div class="field" id="field-localidad">
         <label id="label-localidad">Localidad / Ciudad / Barrio</label>
         <div class="search-wrap search-disabled" id="wrap-localidad">
-          <input type="text" id="search-localidad" placeholder="Primero elegí un municipio..." autocomplete="off" disabled
+          <input type="text" id="search-localidad" placeholder="Primero elegí un municipio..." autocomplete="off" disabled enterkeyhint="search"
             oninput="filtrarOpciones('localidad')" onfocus="abrirDropdown('localidad')" onkeydown="keyNav(event,'localidad')" />
           <span class="search-arrow">▾</span>
           <div class="search-dropdown" id="drop-localidad"></div>
@@ -1311,7 +1324,7 @@
       <div class="field" id="field-barrio" style="display:none;">
         <label id="label-barrio">Barrio</label>
         <div class="search-wrap search-disabled" id="wrap-barrio">
-          <input type="text" id="search-barrio" placeholder="Primero elegí una zona..." autocomplete="off" disabled
+          <input type="text" id="search-barrio" placeholder="Primero elegí una zona..." autocomplete="off" disabled enterkeyhint="search"
             oninput="filtrarOpciones('barrio')" onfocus="abrirDropdown('barrio')" onkeydown="keyNav(event,'barrio')" />
           <span class="search-arrow">▾</span>
           <div class="search-dropdown" id="drop-barrio"></div>
@@ -1329,13 +1342,13 @@
       <div class="two-col">
         <div class="field" id="field-nombre">
           <label for="nombre">Nombre</label>
-          <input type="text" id="nombre" placeholder="Ej: María" oninput="validarSoloLetras('nombre'); updateSteps()" />
+          <input type="text" id="nombre" placeholder="Ej: María" enterkeyhint="next" oninput="validarSoloLetras('nombre'); updateSteps()" />
           <p class="error-msg" id="err-nombre">Obligatorio</p>
           <p class="error-msg" id="err-nombre-numeros">Solo se permiten letras</p>
         </div>
         <div class="field" id="field-apellido">
           <label for="apellido">Apellido</label>
-          <input type="text" id="apellido" placeholder="Ej: García" oninput="validarSoloLetras('apellido'); updateSteps()" />
+          <input type="text" id="apellido" placeholder="Ej: García" enterkeyhint="next" oninput="validarSoloLetras('apellido'); updateSteps()" />
           <p class="error-msg" id="err-apellido">Obligatorio</p>
           <p class="error-msg" id="err-apellido-numeros">Solo se permiten letras</p>
         </div>
@@ -1398,14 +1411,14 @@
 
       <div class="field" id="field-email">
         <label>Correo electrónico</label>
-        <input type="text" id="email" placeholder="Ej: ejemplo@gmail.com" oninput="updateSteps(); validarEmail()" />
-        <p class="error-msg" id="err-email-obligatorio">Obligatorio</p>
+        <input type="text" id="email" placeholder="Ej: ejemplo@gmail.com" enterkeyhint="next" inputmode="email" oninput="updateSteps(); validarEmail()" />
+        <p class="error-msg" id="err-email-obligatorio" style="display:none"></p>
         <p class="error-msg" id="err-email">El correo debe tener @ y terminar en .com (o similar)</p>
       </div>
 
       <div class="field" id="field-celular">
         <label>Celular personal</label>
-        <input type="tel" id="celular" placeholder="Ej: 1141834573" oninput="validarTelefono('celular'); updateSteps()" maxlength="15" />
+        <input type="tel" id="celular" placeholder="Ej: 1141834573" enterkeyhint="next" oninput="validarTelefono('celular'); updateSteps()" maxlength="15" />
         <p class="error-msg" id="err-celular-obligatorio">Obligatorio</p>
         <p class="error-msg" id="err-celular-letras">Solo números, sin guiones, espacios ni letras (ej: 1141819522)</p>
         <p class="error-msg" id="err-celular-corto">El celular debe tener al menos 6 números</p>
@@ -1421,7 +1434,7 @@
 
       <div class="field" id="field-telalt">
         <label>Celular de contacto secundario</label>
-        <input type="tel" id="tel-alt" placeholder="Ej: 1141834573" oninput="validarTelefono('telalt'); updateSteps()" maxlength="15" />
+        <input type="tel" id="tel-alt" placeholder="Ej: 1141834573" enterkeyhint="next" oninput="validarTelefono('telalt'); updateSteps()" maxlength="15" />
         <p class="error-msg" id="err-telalt-obligatorio">Obligatorio</p>
         <p class="error-msg" id="err-telalt-letras">Solo números, sin guiones, espacios ni letras (ej: 1141819522)</p>
         <p class="error-msg" id="err-telalt-corto">El teléfono debe tener al menos 6 números</p>
@@ -1429,7 +1442,7 @@
 
       <div class="field" id="field-nombre-emergencia">
         <label>Nombre del contacto secundario</label>
-        <input type="text" id="nombre-emergencia" placeholder="Ej: Nombre y apellido" oninput="validarSoloLetras('nombre-emergencia'); updateSteps()" />
+        <input type="text" id="nombre-emergencia" placeholder="Ej: Nombre y apellido" enterkeyhint="next" oninput="validarSoloLetras('nombre-emergencia'); updateSteps()" />
         <p class="error-msg" id="err-nombre-emergencia">Obligatorio</p>
         <p class="error-msg" id="err-nombre-emergencia-numeros">Solo se permiten letras</p>
       </div>
@@ -2427,25 +2440,17 @@ function enviar() {
   }
   marcarObligatorio('field-hora-evento', 'err-hora-evento', !document.getElementById('hora-evento').value);
 
-  // Email
+  // Email (opcional — solo valida formato si hay algo escrito)
   const emailVal = document.getElementById('email').value.trim();
-  const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailVal);
-  const errEmailObl = document.getElementById('err-email-obligatorio');
+  const emailValido = !emailVal || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailVal);
   const errEmailFmt = document.getElementById('err-email');
   const fieldEmail  = document.getElementById('field-email');
-  if (!emailVal) {
+  if (!emailValido) {
     fieldEmail.classList.add('field-error');
-    errEmailObl.style.display = 'block';
-    errEmailFmt.style.display = 'none';
-    hayError = true;
-  } else if (!emailValido) {
-    fieldEmail.classList.add('field-error');
-    errEmailObl.style.display = 'none';
     errEmailFmt.style.display = 'block';
     hayError = true;
   } else {
     fieldEmail.classList.remove('field-error');
-    errEmailObl.style.display = 'none';
     errEmailFmt.style.display = 'none';
   }
 
@@ -3178,6 +3183,20 @@ document.addEventListener('click', e => {
   }
   // Esperamos un toque a que termine la carga inicial antes de medir
   setTimeout(() => requestAnimationFrame(contar), 600);
+})();
+
+// Cerrar teclado al hacer scroll en móvil
+(function() {
+  let scrollTimer;
+  window.addEventListener('scroll', function() {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function() {
+      const el = document.activeElement;
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') && el.type !== 'hidden') {
+        el.blur();
+      }
+    }, 50);
+  }, { passive: true });
 })();
 
 </script>
