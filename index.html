@@ -1444,19 +1444,19 @@
         🎉 Por acá te mandamos la confirmación y todos los detalles de tu evento. ¡Asegurate de poner los datos reales!
       </div>
 
-      <div class="field" id="field-email">
-        <label>Correo electrónico</label>
-        <input type="text" id="email" placeholder="Ej: ejemplo@gmail.com" enterkeyhint="next" inputmode="email" oninput="updateSteps(); validarEmail()" />
-        <p class="error-msg" id="err-email-obligatorio" style="display:none"></p>
-        <p class="error-msg" id="err-email">El correo debe tener @ y terminar en .com (o similar)</p>
-      </div>
-
       <div class="field" id="field-celular">
         <label>Celular personal</label>
         <input type="tel" id="celular" placeholder="Ej: 1141834573" enterkeyhint="next" oninput="validarTelefono('celular'); updateSteps()" maxlength="15" />
         <p class="error-msg" id="err-celular-obligatorio">Obligatorio</p>
         <p class="error-msg" id="err-celular-letras">Solo números, sin guiones, espacios ni letras (ej: 1141819522)</p>
         <p class="error-msg" id="err-celular-corto">El celular debe tener al menos 6 números</p>
+      </div>
+
+      <div class="field" id="field-email">
+        <label>Correo electrónico</label>
+        <input type="text" id="email" placeholder="Ej: ejemplo@gmail.com" enterkeyhint="next" inputmode="email" oninput="updateSteps(); validarEmail()" />
+        <p class="error-msg" id="err-email-obligatorio" style="display:none"></p>
+        <p class="error-msg" id="err-email">El correo debe tener @ y terminar en .com (o similar)</p>
       </div>
 
       <div class="sub-badge-row" style="margin-top: 1.4rem;">
@@ -1526,8 +1526,8 @@
         <div><span>Fecha de nacimiento</span><strong id="res-fecha"></strong></div>
         <div><span>Edad</span><strong id="res-edad"></strong></div>
         <div><span>¿Primera vez alquilando?</span><strong id="res-primera-vez"></strong></div>
-        <div><span>Correo electrónico</span><strong id="res-email"></strong></div>
         <div><span>Celular personal</span><strong id="res-celular"></strong></div>
+        <div><span>Correo electrónico</span><strong id="res-email"></strong></div>
         <div><span>Celular de contacto secundario</span><strong id="res-telalt"></strong></div>
         <div><span>Nombre del contacto secundario</span><strong id="res-nombre-emergencia"></strong></div>
         <div><span>Relación con el contacto secundario</span><strong id="res-relacion-emergencia"></strong></div>
