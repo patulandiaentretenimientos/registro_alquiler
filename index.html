@@ -1194,7 +1194,7 @@
 
     <!-- (bloque de info adicional removido para registro de alquiler) -->
 
-    <p class="header-sub"><span class="sub-line1">¡Gracias por elegirnos!</span><span class="sub-line2">Completá el formulario y coordinamos todo</span></p>
+    <p class="header-sub"><span class="sub-line1">¡Gracias por elegirnos!</span><span class="sub-line2">Completá el formulario y coordinamos tu evento</span></p>
   </div>
 
   <div class="card">
@@ -1383,11 +1383,19 @@
 
       <div class="field" id="field-sexo">
         <label>Género</label>
-        <select id="sexo" onchange="updateSteps()">
-          <option value="">— Seleccioná —</option>
-          <option>Femenino</option>
-          <option>Masculino</option>
-        </select>
+        <input type="hidden" id="sexo" value="">
+        <div class="wb-firsttime">
+          <label class="wb-opt">
+            <input type="radio" name="genero" value="Femenino" onchange="seleccionarGenero(this)">
+            <span class="wb-txt">Femenino</span>
+            <span class="wb-check"></span>
+          </label>
+          <label class="wb-opt">
+            <input type="radio" name="genero" value="Masculino" onchange="seleccionarGenero(this)">
+            <span class="wb-txt">Masculino</span>
+            <span class="wb-check"></span>
+          </label>
+        </div>
         <p class="error-msg" id="err-sexo">Obligatorio</p>
       </div>
 
@@ -1424,7 +1432,7 @@
             </div>
           </div>
         </div>
-        <p class="hint" style="margin-top:0.55rem;">🎁 ¡Queremos sorprenderte en tu cumple!</p>
+        <p class="hint" style="margin-top:0.55rem;">🎁 ¡Queremos sorprenderte el día de tu cumple!</p>
         <p class="error-msg" id="err-fecha">Obligatorio</p>
       </div>
 
@@ -2814,6 +2822,14 @@ function seleccionarPrimeraVez(radio) {
   updateSteps();
 }
 
+function seleccionarGenero(radio) {
+  document.querySelectorAll('#field-sexo .wb-opt').forEach(o => o.classList.remove('selected'));
+  const cont = radio.closest('.wb-opt');
+  if (cont) cont.classList.add('selected');
+  document.getElementById('sexo').value = radio.value;
+  updateSteps();
+}
+
 function resetForm() {
   ['nombre','apellido','email','fecha-nac','celular','tel-alt','nombre-emergencia','relacion-emergencia','calle','numero','fecha-evento','hora-evento'].forEach(id => document.getElementById(id).value = '');
   // Resetear el display del hora picker
@@ -2852,6 +2868,8 @@ function resetForm() {
   document.querySelectorAll('input[type="radio"][name^="salud-"]').forEach(r => r.checked = false);
   document.querySelectorAll('input[name="primera-vez"]').forEach(r => r.checked = false);
   document.querySelectorAll('#field-primera-vez .wb-opt').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('input[name="genero"]').forEach(r => r.checked = false);
+  document.querySelectorAll('#field-sexo .wb-opt').forEach(o => o.classList.remove('selected'));
   ['salud-enf-detalle','salud-med-detalle','salud-dieta-detalle','salud-otro-detalle'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   ['enf','med','dieta','otro'].forEach(key => { const el = document.getElementById(`field-salud-${key}-detalle`); if(el) el.style.display='none'; });
   const sd = document.getElementById('search-dieta'); if(sd){ sd.value=''; sd.placeholder='Buscar o escribir dieta/restricción...'; }
