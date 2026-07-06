@@ -2,7 +2,17 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-visual">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-visual">
+<!-- Bloquea el "modo oscuro forzado" de Chrome Android / iOS: el form queda siempre en su paleta clara y no se invierte -->
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#FFF6ED">
+<!-- Evita que iOS convierta solo el DNI / teléfono / patente en links azules que rompen las tarjetas -->
+<meta name="format-detection" content="telephone=no">
+<!-- Comportamiento tipo app si lo agregan a la pantalla de inicio -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Patulandia">
 <script>
 /* ═══════════════════════════════════════════════════════════════════════════
    MODO LIVIANO (lite) — se prende solo en celulares lentos / viejos
@@ -46,6 +56,9 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
+    /* Refuerza el bloqueo del modo oscuro forzado también desde CSS (algunos
+       navegadores ignoran el <meta> y solo respetan esta propiedad) */
+    color-scheme: light;
     --bg: #FFF6ED;            /* crema cálido (fondo de la imagen) */
     --card: #FFFFFF;          /* tarjetas */
     --accent: #2F55C0;        /* azul principal (marca Patulandia) */
@@ -97,7 +110,10 @@
   body {
     font-family: 'Nunito', sans-serif;
     background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
+    min-height: 100dvh; /* altura real del celu contemplando la barra del navegador (iOS/Android) */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1065,6 +1081,11 @@
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
+  /* Saca el retardo de ~300ms al tocar botones/campos en móvil (respuesta instantánea al tacto) */
+  a, button, input, select, label, .search-option, .cal-day, .hora-box,
+  .cal-year-item, .cal-month-item, [role="button"], [onclick] {
+    touch-action: manipulation;
+  }
   /* Mata el scroll horizontal: los halos decorativos del slogan se salen del
      ancho de pantalla y hacían que el form se "moviera" para los costados. */
   html, body {
@@ -1520,11 +1541,8 @@
 // ── Municipios de ZONA OESTE (GBA) y sus localidades ───────────────────────
 // Editá libremente: agregá/sacá municipios o localidades según lo que trabajen.
 const municipiosOeste = {
-  "La Matanza": ["San Justo", "Ramos Mejía", "Lomas del Mirador", "Villa Luzuriaga", "Ciudad Madero", "La Tablada", "Aldo Bonzi", "Tapiales", "Villa Celina", "Ciudad Evita", "Isidro Casanova", "Rafael Castillo", "Gregorio de Laferrère", "González Catán", "Virrey del Pino", "20 de Junio"],
   "Morón": ["Morón Centro", "Morón Sur", "Castelar", "Castelar Norte", "Castelar Sur", "Haedo", "El Palomar", "Villa Sarmiento", "Barrio Gervasio Pavón", "Barrio Luz y Fuerza", "La Cabaña", "Barrio a la Bandera"],
   "Ituzaingó": ["Ituzaingó Centro", "Ituzaingó Norte", "Ituzaingó Sur", "Villa Udaondo", "Parque Leloir", "Villa Las Naciones", "San Alberto", "Villa León", "Parque Alvear", "Itatí", "La Esperanza", "Los Manzanares", "Jardín Pintemar", "Barrio Ferroviario", "Unión y Progreso", "Almagro", "Fortín El Gallo"],
-  "Hurlingham": ["Hurlingham", "Villa Tesei", "William C. Morris"],
-  "Tres de Febrero": ["Caseros", "Santos Lugares", "Ciudadela", "Sáenz Peña", "José Ingenieros", "Villa Bosch", "Churruca", "Loma Hermosa", "Martín Coronado", "Pablo Podestá", "Remedios de Escalada de San Martín", "Villa Raffo", "El Libertador", "11 de Septiembre"],
   "Merlo": {
     "Merlo Centro": ["Merlo Centro"],
     "Merlo Norte": ["Barrio Argentino", "Barrio Amancay", "Barrio Gaboto"],
@@ -1534,10 +1552,7 @@ const municipiosOeste = {
     "San Antonio de Padua": ["Padua Centro", "Padua Norte", "Padua Sur", "Barrio El Triángulo", "Villa Estrella", "Barrio Policial"],
     "Mariano Acosta": ["Barrio La Estrella", "Barrio San Luis", "Barrio Loma Verde", "Villa Posse", "Barrio Río Pipo", "Barrio La Fortaleza", "Barrio Arco Iris", "Agustín Ferrari"],
     "Pontevedra": ["Barrio El Ombú", "Barrio Las Delicias", "Barrio Santa Ana", "Barrio Juancito", "Barrio La Teja", "Barrio Los Aromos", "Barrio 11 de Septiembre", "Barrio La Loma", "Barrio El Sol"]
-  },
-  "Moreno": ["Moreno", "Paso del Rey", "Trujui", "Cuartel V", "Francisco Álvarez", "La Reja"],
-  "Marcos Paz": ["Marcos Paz", "Elías Romero", "Santa Rosa", "Lisandro de la Torre", "Santa Marta"],
-  "General Rodríguez": ["General Rodríguez"]
+  }
 };
 
 // State
@@ -2550,7 +2565,15 @@ function enviar() {
   document.getElementById('res-hora-evento').textContent = horaEvento ? horaEvento + ' hs' : '—';
 
 
+  // Número de comprobante: PAT-DDMMAA-### (da formalidad y confianza)
+  const _hoy = new Date();
+  const _dd = String(_hoy.getDate()).padStart(2,'0');
+  const _mm = String(_hoy.getMonth()+1).padStart(2,'0');
+  const _aa = String(_hoy.getFullYear()).slice(-2);
+  const nroReserva = 'PAT-' + _dd + _mm + _aa + '-' + String(Math.floor(Math.random()*900)+100);
+
   const payload = {
+    nroReserva:        nroReserva,
     nombre:            nombre,
     apellido:          apellido,
     sexo:              sexo,
@@ -2571,19 +2594,38 @@ function enviar() {
     horaEvento:        horaEvento
   };
 
-  if (APPS_SCRIPT_URL) {
-    fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).catch(err => console.warn('No se pudo enviar a Sheets:', err));
-  } else {
-    console.warn('APPS_SCRIPT_URL vacío: no se envió a Sheets (completá la constante).');
-  }
-
+  // Mostramos el éxito de inmediato; el comprobante se genera y envía en segundo plano
   document.getElementById('form-section').style.display = 'none';
   document.getElementById('success-section').style.display = 'block';
+
+  enviarReserva(payload, APPS_SCRIPT_URL);
+}
+
+// Genera la foto del comprobante y manda todo al Apps Script (que avisa por email)
+async function enviarReserva(payload, url) {
+  let comprobante = '';
+  try {
+    comprobante = await generarComprobanteDataURL(payload);
+  } catch (e) {
+    console.warn('No se pudo generar el comprobante:', e);
+  }
+
+  if (!url) {
+    console.warn('APPS_SCRIPT_URL vacío: no se envió nada (completá la constante).');
+    return;
+  }
+
+  try {
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      // text/plain evita el preflight CORS; el Apps Script hace JSON.parse(e.postData.contents)
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ ...payload, comprobante })
+    });
+  } catch (err) {
+    console.warn('No se pudo enviar al Apps Script:', err);
+  }
 }
 
 // ── Dropdown buscador de cobertura médica ──────────────────────────────────
@@ -3221,6 +3263,181 @@ document.addEventListener('click', e => {
     }, 120);
   }, { passive: true });
 })();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── COMPROBANTE-IMAGEN: dibuja la reserva en un canvas y devuelve el PNG (base64)
+//    Se manda al Apps Script para que te llegue por email y lo reenvíes por WhatsApp
+// ═══════════════════════════════════════════════════════════════════════════
+const CMP = {
+  crema:'#FFF6ED', card:'#FFFFFF', accent:'#2F55C0', accentDark:'#1F3E96',
+  accent3:'#D6E0F7', text:'#114E6B', muted:'#6E8794', border:'#E8DECF'
+};
+
+function _roundRect(ctx, x, y, w, h, r) {
+  if (typeof r === 'number') r = {tl:r, tr:r, br:r, bl:r};
+  ctx.beginPath();
+  ctx.moveTo(x + r.tl, y);
+  ctx.lineTo(x + w - r.tr, y);
+  ctx.arcTo(x + w, y, x + w, y + r.tr, r.tr);
+  ctx.lineTo(x + w, y + h - r.br);
+  ctx.arcTo(x + w, y + h, x + w - r.br, y + h, r.br);
+  ctx.lineTo(x + r.bl, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r.bl, r.bl);
+  ctx.lineTo(x, y + r.tl);
+  ctx.arcTo(x, y, x + r.tl, y, r.tl);
+  ctx.closePath();
+}
+
+function _wrap(ctx, text, maxWidth) {
+  const words = String(text || '').split(' ');
+  const lines = [];
+  let line = '';
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = w; }
+    else line = test;
+  }
+  if (line) lines.push(line);
+  return lines.length ? lines : ['—'];
+}
+
+async function generarComprobanteDataURL(r) {
+  if (!r) return '';
+  try { await document.fonts.ready; } catch (e) {}
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  // ── Medidas lógicas ──
+  const W = 760, escala = 2;       // escala 2 = nítido y liviano para email
+  const MX = 34, MY = 34;
+  const cardX = MX, cardW = W - MX * 2;
+  const PX = 42;
+  const innerX = cardX + PX, innerW = cardW - PX * 2;
+  const HH = 172;                  // alto header azul
+
+  const direccion = [
+    [r.calle, r.numero].filter(Boolean).join(' '),
+    r.barrio, r.localidad, r.municipio
+  ].filter(Boolean).join(', ');
+
+  const filas = [
+    { label: 'TITULAR DE LA RESERVA', valor: [r.nombre, r.apellido].filter(Boolean).join(' ') },
+    { label: 'DIRECCIÓN DEL EVENTO',  valor: direccion },
+    { label: 'TELÉFONO DE CONTACTO',  valor: r.celular || '—' }
+  ];
+
+  ctx.font = '700 20px Nunito, sans-serif';
+  filas.forEach(f => { f.lineas = _wrap(ctx, f.valor, innerW); });
+
+  const padTop = 30, bannerH = 122, gapBanner = 28;
+  const labelH = 17, gapLV = 7, lineH = 27, gapFila = 22;
+  const filaAlto = f => labelH + gapLV + f.lineas.length * lineH + gapFila;
+  const datosH = filas.reduce((a, f) => a + filaAlto(f), 0);
+  const sepGap = 26, footerH = 120;
+
+  const contentH = padTop + bannerH + gapBanner + datosH + sepGap + footerH;
+  const cardH = HH + contentH;
+  const H = MY + cardH + MY;
+
+  canvas.width  = Math.round(W * escala);
+  canvas.height = Math.round(H * escala);
+  ctx.scale(escala, escala);
+  ctx.textBaseline = 'alphabetic';
+
+  // Fondo crema
+  ctx.fillStyle = CMP.crema;
+  ctx.fillRect(0, 0, W, H);
+
+  // Card blanca con sombra
+  ctx.save();
+  ctx.shadowColor = 'rgba(47,85,192,0.16)';
+  ctx.shadowBlur = 34; ctx.shadowOffsetY = 12;
+  _roundRect(ctx, cardX, MY, cardW, cardH, 30);
+  ctx.fillStyle = CMP.card; ctx.fill();
+  ctx.restore();
+
+  // Header azul
+  _roundRect(ctx, cardX, MY, cardW, HH, { tl: 30, tr: 30, br: 0, bl: 0 });
+  ctx.fillStyle = CMP.accent; ctx.fill();
+
+  const cx = W / 2;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '800 44px "Playfair Display", serif';
+  ctx.fillText('🎈 Patulandía', cx, MY + 64);
+  ctx.font = '700 18px Nunito, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.92)';
+  ctx.fillText('COMPROBANTE DE RESERVA', cx, MY + 96);
+  const nro = r.nroReserva || '—';
+  ctx.font = '800 16px Nunito, sans-serif';
+  const nroW = ctx.measureText(nro).width + 36;
+  _roundRect(ctx, cx - nroW / 2, MY + 116, nroW, 34, 17);
+  ctx.fillStyle = 'rgba(255,255,255,0.18)'; ctx.fill();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillText(nro, cx, MY + 138);
+
+  // Banner FECHA / HORA
+  let y = MY + HH + padTop;
+  _roundRect(ctx, innerX, y, innerW, bannerH, 18);
+  ctx.fillStyle = CMP.accent3; ctx.fill();
+  ctx.strokeStyle = 'rgba(47,85,192,0.22)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(innerX + innerW / 2, y + 24);
+  ctx.lineTo(innerX + innerW / 2, y + bannerH - 24);
+  ctx.stroke();
+  const colCx1 = innerX + innerW / 4;
+  const colCx2 = innerX + innerW * 3 / 4;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = CMP.accentDark;
+  ctx.font = '800 14px Nunito, sans-serif';
+  ctx.fillText('📅 FECHA DEL EVENTO', colCx1, y + 40);
+  ctx.fillText('🕐 HORA DE INICIO', colCx2, y + 40);
+  ctx.fillStyle = CMP.text;
+  ctx.font = '800 32px "Playfair Display", serif';
+  ctx.fillText(r.fechaEvento || '—', colCx1, y + 86);
+  ctx.fillText(r.horaEvento ? r.horaEvento + ' hs' : '—', colCx2, y + 86);
+
+  // Filas de datos
+  y += bannerH + gapBanner;
+  ctx.textAlign = 'left';
+  filas.forEach(f => {
+    ctx.fillStyle = CMP.muted;
+    ctx.font = '800 14px Nunito, sans-serif';
+    ctx.fillText(f.label, innerX, y + labelH);
+    ctx.fillStyle = CMP.text;
+    ctx.font = '700 20px Nunito, sans-serif';
+    let ly = y + labelH + gapLV + 18;
+    f.lineas.forEach(ln => { ctx.fillText(ln, innerX, ly); ly += lineH; });
+    y += filaAlto(f);
+  });
+
+  // Separador
+  y += sepGap / 2;
+  ctx.strokeStyle = CMP.border;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(innerX, y); ctx.lineTo(innerX + innerW, y); ctx.stroke();
+  y += sepGap / 2;
+
+  // Footer
+  ctx.textAlign = 'center';
+  ctx.fillStyle = CMP.accentDark;
+  ctx.font = '800 20px Nunito, sans-serif';
+  ctx.fillText('¡Gracias por reservar con nosotros! 🎈', cx, y + 36);
+  ctx.fillStyle = CMP.muted;
+  ctx.font = '600 14px Nunito, sans-serif';
+  ctx.fillText('Te contactamos para coordinar todos los detalles 🎉', cx, y + 62);
+  const hoy = new Date();
+  const fEmision = String(hoy.getDate()).padStart(2,'0') + '/' +
+                   String(hoy.getMonth()+1).padStart(2,'0') + '/' + hoy.getFullYear();
+  ctx.fillStyle = CMP.muted;
+  ctx.font = '700 13px Nunito, sans-serif';
+  ctx.fillText('Patulandía Entretenimientos · Emitido el ' + fEmision, cx, y + 90);
+
+  return canvas.toDataURL('image/png');
+}
 
 </script>
 <div id="overlay-backdrop"></div>
